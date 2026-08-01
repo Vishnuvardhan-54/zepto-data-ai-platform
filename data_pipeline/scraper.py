@@ -1,3 +1,4 @@
+
 import requests
 from bs4 import BeautifulSoup
 import pandas as pd
@@ -123,3 +124,18 @@ for category in selected_categories:
         else:
             #Stop pagination when no next page exists
             current_page=None
+
+
+# Convert the scraped data into a pandas DataFrame
+books_df = pd.DataFrame(all_books)
+
+# Save the cleaned dataset as a CSV file
+books_df.to_csv(
+    "data_pipeline/data/books.csv",
+    index=False,
+    encoding="utf-8-sig"
+)
+
+print("\nData successfully saved to data_pipeline/data/books.csv")
+print(f"Total Books Scraped: {len(books_df)}")
+print(books_df.head())
