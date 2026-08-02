@@ -16,7 +16,7 @@ RATING_MAP = {
 
 # Send a GET request to the Books to Scrape website
 response = requests.get(BASE_URL, timeout=30)
-
+response.raise_for_status()
 # Check whether the website request was successful
 print("Status Code:", response.status_code)
 
@@ -51,7 +51,7 @@ print("\nFirst 3 Categories:")
 for category in categories[:4]:
     print(category)
 
-#scrape the first three categories
+#scrape the first four categories
 selected_categories = categories[:4]
 all_books = []
 
@@ -80,13 +80,18 @@ for category in selected_categories:
         for book in book_cards:
             #Extract the book title
             title=book.h3.a["title"]
-            #Extract and clean the price
-            price_text = book.select_one(".price_color").text.strip()
-            price_gbp = float(price_text.replace("£", "").replace("Â", ""))
 
-            #Convert rating into an integer
-            rating_text = book.select_one(".star-rating")["class"][1]
-            rating=RATING_MAP[rating_text]
+            try:
+                #Extract and clean the price
+                price_text = book.select_one(".price_color").text.strip()
+                price_gbp = float(price_text.replace("£", "").replace("Â", ""))
+
+                #convert rating into an integer
+                rating_text = book.select_one(".star-rating")["class"][1]
+                rating=RATING_MAP[rating_text]
+            except (ValueError, KeyError):
+                #skip the current book if parsing fails
+                continue
 
             #convert stock status into boolean
             availability_text = book.select_one(".availability").text.strip()
@@ -144,7 +149,7 @@ connection = sqlite3.connect("data_pipeline/database/books.db")
 #create a cursor to execute SQL queries
 cursor = connection.cursor()
 
-#creaye the categories table
+#create the categories table
 cursor.execute("""
 CREATE TABLE IF NOT EXISTS categories (
      category_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -181,7 +186,7 @@ for category in books_df["category"].unique():
 #save inserted category 
 connection.commit()
 
-#create a mapping betwwen category name and category
+#create a mapping between category name and category
 cursor.execute("""
 SELECT category_id, category_name
 FROM categories
