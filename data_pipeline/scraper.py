@@ -1,4 +1,4 @@
-
+import sqlite3
 import requests
 from bs4 import BeautifulSoup
 import pandas as pd
@@ -50,9 +50,6 @@ for category in category_links:
 print("\nFirst 3 Categories:")
 for category in categories[:4]:
     print(category)
-
-# Select the first category for initial scraping test
-#test_category = categories[0]
 
 #scrape the first three categories
 selected_categories = categories[:4]
@@ -139,3 +136,91 @@ books_df.to_csv(
 print("\nData successfully saved to data_pipeline/data/books.csv")
 print(f"Total Books Scraped: {len(books_df)}")
 print(books_df.head())
+
+
+#connect to the SQLite database 
+connection = sqlite3.connect("data_pipeline/database/books.db")
+
+#create a cursor to execute SQL queries
+cursor = connection.cursor()
+
+#creaye the categories table
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS categories (
+     category_id INTEGER PRIMARY KEY AUTOINCREMENT,
+     category_name TEXT UNIQUE NOT NULL
+     )
+""")
+# Create the books table
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS books (
+    book_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title TEXT NOT NULL,
+    price_gbp REAL NOT NULL,
+    price_inr REAL NOT NULL,
+    rating INTEGER NOT NULL,
+    in_stock INTEGER NOT NULL,
+    category_id INTEGER NOT NULL,
+    FOREIGN KEY (category_id)
+    REFERENCES categories(category_id)
+)
+""")
+
+# Clear existing data before inserting fresh records
+cursor.execute("DELETE FROM books")
+cursor.execute("DELETE FROM categories")
+connection.commit()
+
+#Insert unique categories into the categories table
+for category in books_df["category"].unique():
+    cursor.execute("""
+    INSERT OR  IGNORE INTO categories (category_name)
+    VALUES (?)
+    """,(category,))
+
+#save inserted category 
+connection.commit()
+
+#create a mapping betwwen category name and category
+cursor.execute("""
+SELECT category_id, category_name
+FROM categories
+""")
+
+category_map = {
+    category_name: category_id
+    for category_id, category_name in cursor.fetchall()
+}
+print(category_map)
+
+#Insert every book into the books table
+for _, row in books_df.iterrows():
+
+    cursor.execute("""
+    INSERT INTO books (
+        title,
+        price_gbp,
+        price_inr,
+        rating,
+        in_stock,
+        category_id
+    )
+    VALUES(?,?,?,?,?,?)
+    """,
+    (
+        row["title"],
+        row["price_gbp"],
+        row["price_inr"],
+        row["rating"],
+        int(row["in_stock"]),
+        category_map[row["category"]]
+            
+    ))
+
+
+#save all database changes
+connection.commit()
+#close the database connection
+connection.close()
+
+print("\nData inserted successfully into SQLite database.")
