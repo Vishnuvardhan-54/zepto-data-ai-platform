@@ -1,4 +1,4 @@
-from scraper import categories
+
 import sqlite3
 import pandas as pd
 
