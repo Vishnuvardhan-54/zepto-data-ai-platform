@@ -159,3 +159,70 @@ ChromaDB
 Sentence Transformers
 Pydantic
 Docker
+
+---
+
+## LangGraph Workflow
+
+```text
+User Query
+    ↓
+classify_intent
+    ├── policy_question → retrieve_and_answer → ChromaDB → Response
+    └── general_question → direct_answer → Response
+```
+
+The LangGraph StateGraph uses three nodes:
+- `classify_intent`
+- `retrieve_and_answer`
+- `direct_answer`
+
+Policy questions use ChromaDB retrieval, while general questions are handled directly.
+
+### Mock Mode
+
+By default, `MOCK_LLM=1` is used.
+
+In mock mode:
+- Intent classification uses the required keyword-based routing.
+- Policy queries use real `all-MiniLM-L6-v2` embeddings and ChromaDB retrieval.
+- General queries are handled by `direct_answer`.
+- No external LLM API or API key is required.
+
+### Example Calls
+
+#### Policy Question
+
+Request:
+```json
+{
+  "query": "What is the return policy for grocery items?"
+}
+```
+
+Example response:
+```json
+{
+  "answer": "Based on the retrieved context: Grocery and perishable items may be reported for a return within 24 hours of delivery if damaged, spoiled, or incorrect...",
+  "sources": ["doc_02"],
+  "confidence": 1.0
+}
+```
+
+#### General Question
+
+Request:
+```json
+{
+  "query": "What is Python?"
+}
+```
+
+Example response:
+```json
+{
+  "answer": "I can only answer questions about Zepto policies right now.",
+  "sources": [],
+  "confidence": 1.0
+}
+```
