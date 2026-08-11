@@ -141,6 +141,66 @@ The following SQL concepts have been implemented.
 
 ---
 
+# Executed SQL Queries & Outputs
+
+The following SQL queries are implemented and executed using SQLite and Pandas.
+
+### Query 1 — Books with Rating 5
+
+```sql
+SELECT title, rating
+FROM books
+WHERE rating = 5;
+```
+
+Output: Displays all books with a rating of 5.
+
+### Query 2 — Top 10 Most Expensive Books
+
+```sql
+SELECT title, price_inr
+FROM books
+ORDER BY price_inr DESC
+LIMIT 10;
+```
+
+Output: Displays the 10 most expensive books based on INR price.
+
+### Query 3 — Unique Categories
+
+```sql
+SELECT DISTINCT category_name
+FROM categories;
+```
+
+Output: Displays all unique book categories.
+
+### Query 4 — Books with Rating Between 3 and 5
+
+```sql
+SELECT title, rating
+FROM books
+WHERE rating BETWEEN 3 AND 5;
+```
+
+Output: Displays books having ratings from 3 to 5.
+
+### Query 5 — Books with Categories
+
+```sql
+SELECT b.title, c.category_name,
+       b.rating, b.price_inr
+FROM books b
+JOIN categories c
+ON b.category_id = c.category_id
+ORDER BY b.rating DESC
+LIMIT 10;
+```
+
+Output: Displays the top 10 books by rating along with their category and INR price.
+
+---
+
 # Pandas Operations
 
 The following Pandas operations were implemented.
