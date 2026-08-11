@@ -29,7 +29,7 @@ Query Retrieval
 LangGraph
    ↓
 Answer Generation
-
+```
 
 ### Pipeline Flow
 
@@ -47,42 +47,55 @@ POST /ask
 
 Request:
 
+```json
 {
   "query": "How much is the delivery fee?"
 }
+```
 
 Response:
 
+```json
 {
   "answer": "Based on the retrieved context: Delivery Policy...",
   "sources": ["doc_01", "doc_05", "doc_02"],
   "confidence": 1.0
 }
+```
+
 General Question
 
 Request:
 
+```json
 {
   "query": "What is Python?"
 }
+```
 
 Response:
 
+```json
 {
   "answer": "I can only answer questions about Zepto policies right now.",
   "sources": [],
   "confidence": 1.0
 }
+```
 
 ## Run Locally
 
 Activate the virtual environment:
 
+```powershell
 .\.venv\Scripts\Activate
+```
 
 Run the FastAPI application:
 
+```bash
 uvicorn main:app --reload
+```
 
 Open the Swagger UI:
 
@@ -92,11 +105,15 @@ http://127.0.0.1:8000/docs
 
 Build the Docker image:
 
+```bash
 docker build -t zepto-support-assistant .
+```
 
 Run the container:
 
+```bash
 docker run -d -p 8000:8000 --name zepto-support zepto-support-assistant
+```
 
 Open the API documentation:
 
@@ -104,10 +121,13 @@ http://127.0.0.1:8000/docs
 
 Check the running container:
 
+```bash
 docker ps
+```
 
 ## Project Structure
 
+```text
 support_assistant/
 ├── app/
 │   ├── ingestion.py
@@ -128,6 +148,7 @@ support_assistant/
 ├── Dockerfile
 ├── requirements.txt
 └── README.md
+```
 
 ## Technologies Used
 
